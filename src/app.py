@@ -9,6 +9,9 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User
+from models import db, Characters
+from models import db, Planets
+from models import db, Vehicles
 #from models import Person
 
 app = Flask(__name__)
@@ -41,6 +44,37 @@ def handle_hello():
 
     response_body = {
         "msg": "Hello, this is your GET /user response "
+    }
+
+    return jsonify(response_body), 200
+# ------------------------------------Character------------------------------------
+@app.route('/characters', methods=['GET'])
+def personajes():
+    allpersoajes = Characters.query.all()
+    results = list(map(lambda item: item.serialize(), allpersoajes))
+    return jsonify(results), 200
+# obteniendo info de un solo personaje:
+@app.route('/characters/<int:character_id>', methods=['GET'])
+def get_info_personaje(character_id):
+    characters = Characters.query.filter_by(id=character_id).first()
+    return jsonify(characters.serialize()), 200
+
+# -----------------------------------------Planets---------------------------------------
+@app.route('/planets', methods=['GET'])
+def planetas():
+
+    response_body = {
+        "msg": "funciona"
+    }
+
+    return jsonify(response_body), 200
+
+# -----------------------------------------Vehicles------------------------------------------------
+@app.route('/vehicles', methods=['GET'])
+def vehiculos():
+
+    response_body = {
+        "msg": "funciona"
     }
 
     return jsonify(response_body), 200

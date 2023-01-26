@@ -17,3 +17,55 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
+# -----------------------------Character---------------------------------------------------
+class Characters(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    gender = db.Column(db.String(80), unique=False, nullable=True)
+    hairColor = db.Column(db.String(80), unique=False, nullable=True)
+
+    def __repr__(self):
+        return '<Characters %r>' % self.name
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "gender": self.gender,
+            "hairColor": self.hairColor,
+            # do not serialize the password, its a security breach
+        }
+# ------------------------------Planets-----------------------------------------------------------
+class Planets(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    terrain = db.Column(db.String(80), unique=False, nullable=True)
+   
+
+    def __repr__(self):
+        return '<Planets %r>' % self.name
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            # do not serialize the password, its a security breach
+        }
+
+# -------------------------------Vehicles-----------------------------------------------------------
+
+class Vehicles(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    
+   
+
+    def __repr__(self):
+        return '<Vehicles %r>' % self.name
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            # do not serialize the password, its a security breach
+        }
