@@ -8,8 +8,15 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Characters, Planets, Vehicles, Favs
+from models import db, User, Characters, Planets, Vehicles
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
+import json
 # from models import Person
+
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -26,6 +33,9 @@ MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+jwt = JWTManager(app)
 
 # Handle/serialize errors like a JSON object
 
@@ -90,27 +100,27 @@ def get_info_personaje(character_id):
 #______________________characters__________________________________________
 
 
-@app.route('/characters', methods=['POST'])
-def add_new_todo():
+# @app.route('/characters', methods=['POST'])
+# def add_new_todo():
 
-    me = User('admin', 'admin@example.com') 
-    db.session.add(me)
-    db.session.commit()
+#     me = User('admin', 'admin@example.com') 
+#     db.session.add(me)
+#     db.session.commit()
 
 
-    return jsonify(todos)
+#     return jsonify(todos)
 
 
 #_______________favs________________________
 
-@app.route('/favs', methods=['GET'])
-def handle_favs():
+# @app.route('/favs', methods=['GET'])
+# def handle_favs():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+#     response_body = {
+#         "msg": "Hello, this is your GET /user response "
+#     }
 
-    return jsonify(response_body), 200
+#     return jsonify(response_body), 200
 
 
 # ______________planets_______________________
@@ -155,6 +165,57 @@ def get_info_vehicle(vehicle_id):
 
 # _____________________________________________
 
+@app.route('/user', methods=['POST'])
+def add_new_user():
+      
+        request_body = json.loads(request.data)
+        print(request_body)
+
+        user = User.query.filter_by(email=request_body["email"]).first()
+        
+        if user is  None:
+            usuario = User(email=request_body["email"], password=request_body["password"], username=request_body["username"])
+        
+            db.session.add(usuario)
+            db.session.commit()
+
+            return jsonify("ok"), 200
+
+        return jsonify("este email ya esta registrado"), 200
+       
+
+        # return jsonify("ok"), 200
+
+
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+
+    user = User.query.filter_by(email=email).first()
+
+    if email != user.email or password != user.password:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    access_token = create_access_token(identity=email)
+    return jsonify(access_token=access_token)
+
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    # Access the identity of the current user with get_jwt_identity
+    current_user = get_jwt_identity()
+
+    user = User.query.filter_by(email=current_user).first()
+
+    response_body = {
+        "msg": "ok",
+        "user": user.serialize()
+    }
+
+    return jsonify(response_body), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
