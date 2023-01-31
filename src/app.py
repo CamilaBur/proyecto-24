@@ -165,7 +165,7 @@ def get_info_vehicle(vehicle_id):
 
 # _____________________________________________
 
-@app.route('/user', methods=['POST'])
+@app.route('/signup', methods=['POST'])
 def add_new_user():
       
         request_body = json.loads(request.data)
@@ -216,6 +216,26 @@ def protected():
     }
 
     return jsonify(response_body), 200
+
+    @app.route('/private', methods=['GET'])
+    @jwt_required()
+    def protected():
+
+        current_user = get_jwt_identity()
+
+        user = User.query.filter_by(email=current_user).first()
+        
+        response_body = {
+
+            "msg": "ok",
+            "user": user.serialize()
+        }
+           
+
+        return jsonify(response_body), 200
+       
+
+        # return jsonify("ok"), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
